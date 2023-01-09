@@ -1,6 +1,6 @@
 # CustomerOperations
 
-- CustomerOperations proje'de Biletleme adında bir Veritabanı oluşuturlup, müşteriler tablosu oluşuturuldu. Açılan bu müşteriler tablosunda Asp.net Core MVC  + Dapper Framework kullanarak CRUD (Crate – Read-Update-Delete) işlemleri yapılarak bir Ekleme, Listeleme (Okuma), Silme , Güncelleme  Operasyonları yapılmaktadır.
+- CustomerOperations proje'de Biletleme adında bir Veritabanı oluşuturlup, müşteriler tablosu oluşuturuldu. Açılan bu müşteriler tablosunda Asp.net Core MVC 6.0  + Dapper Framework kullanarak CRUD (Creat – Read-Update-Delete) işlemleri yapılarak bir Ekleme, Listeleme (Okuma), Silme , Güncelleme  Operasyonları yapılmaktadır.
 
 #
 
@@ -25,7 +25,7 @@
   #
   
   ### Proje nasıl çalışır?
-   - Db oluşturacağız (Biletleme), Müşteriler tablosu oluşturma script oluşturacağız.
+   - Db oluşturacağız (Biletleme), Müşteriler tablosu oluşturma script çalıştıracağız.
    
       USE [Biletleme]
       GO
@@ -50,6 +50,8 @@
           [guncelleme_tarihi] DATETIME       NULL
       );
       
+   - Yaptığımız proje visual studio ile açılıp çalıştıracağız.
+      
    - Yeni müşteri ekleme işlemi için iki yöntem var:
      - Dinamik yöntemi,
        ![Inkeddinamik](https://user-images.githubusercontent.com/108132815/211225656-de1dfc10-a22d-4f3c-a044-6d84d7b59d80.jpg)
@@ -57,8 +59,6 @@
      - Ayrı sayfada ekleme imkanı sağlandı.
        ![2023-01-09 03_10_23-Window](https://user-images.githubusercontent.com/108132815/211225806-704e2378-004a-45fd-a7a1-033df011b13d.png)
       
-      
-   - Yaptığımız proje visual studio ile açılıp çalıştıracağız.
 
 #
 
