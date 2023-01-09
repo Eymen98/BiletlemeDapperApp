@@ -1,0 +1,13 @@
+﻿@using BiletlemeDapperApp.Domain
+@model CustomerViewModel
+@{
+    ViewData["Title"] = "Customer Page";
+}
+
+<div class="text-center">
+    <h6 class="display-5 bg-secondary text-light rounded">Biletleme Projesine Hoş Geldiniz</h6>
+</div>
+<hr />
+<div class="container-fluid">
+     @await Html.PartialAsync("_CustomerList",Model)
+</div>

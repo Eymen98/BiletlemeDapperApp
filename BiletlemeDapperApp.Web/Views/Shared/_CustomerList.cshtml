@@ -1,0 +1,520 @@
+﻿@using BiletlemeDapperApp.Domain
+@using BiletlemeDapperApp.Infrastructure
+@using Newtonsoft.Json
+@model CustomerViewModel
+
+<div class="container">
+    <div class="jumbotron text-center bg-success text-white rounded rounded-5">
+        <h1>Müşteri Listesi</h1>
+        <p>Seçtiğiniz herhangi bir müşteri ekleyebilirsiniz, düzenleyebilirsiniz veya silebilirsiniz.</p>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-right">
+            <input type="button" id="btnAdd" class="btn btn-outline-secondary btn-lg ps-4" value="Yeni Ekle" style="background-image:url('add.ico');background-size: 20px 20px;background-repeat: no-repeat;background-position: 3px 14px;" />
+        </div>
+    </div>
+    <div class="row pt-3">
+        <div class="col-md-12 col-sm-12 col-12 p-2">
+            <table id="tblData" class="table table-dark table-bordered table-hover table-striped" style="border-bottom:0px solid rgba(0, 0, 0, 0.3) !important;">
+                <thead>
+                    <tr>
+                        <th style="visibility: hidden;">Id</th>
+                        <th>Adı</th>
+                        <th>Soyadı</th>
+                        <th>Doğum Tarihi</th>
+                        <th>Telefon No</th>
+                        <th>E-posta</th>
+                        <th>Cinsiyet</th>
+                        <th>Durum</th>
+                        <th class="tdaction">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var musteri in Model.MusteriListesi)
+                    {
+                        <tr>
+                            <td class="tdId" style="visibility: hidden;">
+                                @musteri.id
+                            </td>
+                            <td class="tdAdi">
+                                @musteri.musteri_adi
+                            </td>
+                            <td class="tdSoyadi">
+                                @musteri.musteri_soyadi
+                            </td>
+                            <td class="tdDogumTarihi">
+                                @musteri.dogum_tarihi.ToString("dd.MM.yyyy")
+                            </td>
+                            <td class="tdTelNo">
+                                @musteri.tel_no
+                            </td>
+                            <td class="tdEmail">
+                                @musteri.email
+                            </td>
+                            <td class="tdCinsiyet">
+                                @musteri.cinsiyet.GetDescription()
+                            </td>
+                            <td class="tdDurum">
+                                @musteri.durum.GetDescription()
+                            </td>
+                            <td class="tdAction">
+                                <button class='btn btn-success btn-sm btn-edit'>Edit</button>
+                                <button class='btn btn-danger btn-sm'>Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+    <script>
+        var emptyRow = "<tr><td colspan='10' class='text-center'>Eşleşen Kayıt Bulunmadı</td></tr>";
+        var emptyNewRow = "<tr class='trNewRow'>"; 
+        emptyNewRow = emptyNewRow + "    <td class='tdId' style='visibility: hidden;'>";
+        emptyNewRow = emptyNewRow + "        <input type='text' class='form-control txtId' placeholder='Id Giriniz'/>";
+        emptyNewRow = emptyNewRow + "    </td>";
+        emptyNewRow = emptyNewRow + "    <td class='tdAdi'>";
+        emptyNewRow = emptyNewRow + "        <input type='text' class='form-control txtAdi' placeholder='Adı Giriniz'/>";
+        emptyNewRow = emptyNewRow + "    </td>";
+        emptyNewRow = emptyNewRow + "    <td class='tdSoyadi'>";
+        emptyNewRow = emptyNewRow + "        <input type='text' class='form-control txtSoyadi' placeholder='Soyadı Giriniz'/>";
+        emptyNewRow = emptyNewRow + "    </td>";
+        emptyNewRow = emptyNewRow + "    <td class='tdDogumTarihi'>";
+        emptyNewRow = emptyNewRow + "        <input type='text' class='form-control txtDogumTarihi datetimepicker' placeholder='Doğum Tarihi Giriniz'/>";
+        emptyNewRow = emptyNewRow + "    </td>";
+        emptyNewRow = emptyNewRow + "    <td class='tdTelNo'>";
+        emptyNewRow = emptyNewRow + "        <input type='text' class='form-control txtTelNo' placeholder='05xxxxxxxxx'/>";
+        emptyNewRow = emptyNewRow + "    </td>";
+        emptyNewRow = emptyNewRow + "    <td class='tdEmail'>";
+        emptyNewRow = emptyNewRow + "        <input type='text' class='form-control txtEmail' placeholder='ornek@ornek.com'/>";
+        emptyNewRow = emptyNewRow + "    </td>";
+
+        emptyNewRow = emptyNewRow + "    <td class='tdCinsiyet'>";
+        emptyNewRow = emptyNewRow + "     <select class='form-select form-select-sm' id='mySelect' aria-label='.form-select-sm example'><option selected>Seçiniz</option><option value='1'>Erkek</option><option value='2'>Kadın</option><option value='3'>Belirtilmemiş</option></select>";
+        emptyNewRow = emptyNewRow + "    </td>";
+
+        emptyNewRow = emptyNewRow + "    <td class='tdDurum'>";
+        emptyNewRow = emptyNewRow + "     <div class='form-check form-switch'> <input class='form-check-input ckboxDurum' type='checkbox' id='mySwitch' name='darkmode' value='yes' checked> </div>";
+        emptyNewRow = emptyNewRow + "    </td>";
+
+        emptyNewRow = emptyNewRow + "    <td class='tdAction'>";
+        emptyNewRow = emptyNewRow + "        <button class='btn btn-sm btn-success btn-save'>Save</button>";
+        emptyNewRow = emptyNewRow + "        <button class='btn btn-sm btn-success btn-cancel'>Cancel</button>";
+        emptyNewRow = emptyNewRow + "    </td>";
+        emptyNewRow = emptyNewRow + "</tr>";
+
+        var rowButtons ="<button class='btn btn-success btn-sm btn-edit' >Edit</button>  <button class='btn btn-danger btn-sm' >Delete</button> ";
+        var rowUpdateButtons ="<button class='btn btn-success btn-sm btn-save' >Update</button>  <button class='btn btn-sm btn-warning btn-cancel-process'>Cancel</button> ";
+
+        $(document).ready(function () {
+           
+            $('#tblData').dataTable({
+            "searching": true,
+            "aaSorting": [],
+            "columnDefs": [{ orderable: true, targets: [0] }],
+            "bInfo": false,
+            "pageLength": 10,
+            "bLengthChange": true,
+            "language": {
+               "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Turkish.json"
+            }
+          });
+
+            debugger;
+            $("#tblData tbody").append(emptyRow); // adding empty row on page load 
+            
+            $("#btnAdd").click(function () { 
+                debugger;
+                if ($("#tblData tbody").children().children().length == 1) {
+                    $("#tblData tbody").html("");
+                }
+                debugger;
+                $("#tblData tbody").append(emptyNewRow); // appending dynamic string to table tbody
+
+                $('.datetimepicker').datetimepicker({
+                    lang: 'tr',
+                    format: 'd.m.Y',
+                    onSelectDate: function (currentDate, $input) {
+                        $input.change();
+                    }
+                 });
+
+            });
+            
+            $('#tblData').on('click', '.btn-save', function () {
+               
+                const id =  $(this).parent().parent().find(".txtId").val();
+                
+                const adi =  $(this).parent().parent().find(".txtAdi").val();
+                var checkMessage = CheckValue("adi", adi);
+                if (checkMessage !== '')
+                {
+                    alert(checkMessage);
+                    return;
+                }
+                
+                const soyadi =  $(this).parent().parent().find(".txtSoyadi").val();
+                var checkMessage = CheckValue("soyadi", soyadi);
+                if (checkMessage !== '')
+                {
+                    alert(checkMessage);
+                    return;
+                }
+                
+                const dogumTarihi =  $(this).parent().parent().find(".txtDogumTarihi").val();
+                var checkMessage = CheckValue("dogumTarihi", dogumTarihi);
+                if (checkMessage !== '')
+                {
+                    alert(checkMessage);
+                    return;
+                }
+                
+                const telNo =  $(this).parent().parent().find(".txtTelNo").val();
+                var checkMessage = CheckValue("telNo", telNo);
+                if (checkMessage !== '')
+                {
+                    alert(checkMessage);
+                    return;
+                }
+                
+                const email =  $(this).parent().parent().find(".txtEmail").val();
+                var checkMessage = CheckValue("email", email);
+                if (checkMessage !== '')
+                {
+                    alert(checkMessage);
+                    return;
+                }
+                
+                debugger;
+
+                const cinsiyet = id === '' ? $(this).parent().parent().find("#mySelect option:Selected").val() : $(this).parent().parent().find("#mySelect_"+id.trim()+" option:Selected").val();
+                var checkMessage = CheckValue("cinsiyet", cinsiyet);
+                if (checkMessage !== '')
+                {
+                    alert(checkMessage);
+                    return;
+                }
+
+                const durum = id === '' ? $(this).parent().parent().find("#mySwitch").val() : $(this).parent().parent().find("#mySwitch_"+id.trim()+"").val();
+                 
+
+                $(this).parent().parent().find(".tdId").html(""+id+""); 
+                $(this).parent().parent().find(".tdAdi").html(""+adi+"");
+                $(this).parent().parent().find(".tdSoyadi").html(""+soyadi+"");
+                $(this).parent().parent().find(".tdDogumTarihi").html(""+dogumTarihi+"");
+                $(this).parent().parent().find(".tdTelNo").html(""+telNo+"");
+                $(this).parent().parent().find(".tdEmail").html(""+email+"");
+                
+                var cinsiyetText = cinsiyetIslem2(cinsiyet.trim());
+
+                $(this).parent().parent().find(".tdCinsiyet").html(""+cinsiyetText+"");
+
+                if(durum === "yes")
+                {
+                    $(this).parent().parent().find(".tdDurum").html("Aktif");
+                }
+                else
+                {
+                    $(this).parent().parent().find(".tdDurum").html("Pasif");
+                }
+
+                $(this).parent().parent().find(".tdAction").html(rowButtons);
+                if (id.trim() === '')
+                {
+                    $.ajax({
+                        type: "POST",
+                        cache: false,
+                        async: true,
+                        url: "/Customer/Create/",
+                        data: { 
+                            MusteriAdi: adi,
+                            MusteriSoyadi: soyadi,
+                            DogumTarihi: dogumTarihi,
+                            TelNo: telNo,
+                            Email: email,
+                            Cinsiyet: cinsiyet,
+                            Durum: durum === "yes" ? 1:2
+                        },
+                        success: function (data) {
+                            if(data===true) {
+                                alert("Başarıyla kaydedildi.");
+                                window.location.reload(true);
+                            }
+                            else{
+                                 alert("Başarısız.");
+                            }
+                        },
+                        error: function (errorData) {
+
+                        }
+                    });
+                }
+                else
+                {
+                    $.ajax({
+                        type: "POST",
+                        cache: false,
+                        async: true,
+                        url: "/Customer/Update/",
+                        data: { 
+                            Id: id.trim(),
+                            MusteriAdi: adi,
+                            MusteriSoyadi: soyadi,
+                            DogumTarihi: dogumTarihi,
+                            TelNo: telNo,
+                            Email: email,
+                            Cinsiyet: cinsiyet,
+                            Durum: durum === "yes" ? 1:2
+                        },
+                        success: function (data) {
+                            if(data===true) {
+                                alert("Başarıyla kaydedildi.");
+                            }
+                            else
+                            {
+                                 alert("Başarısız.");
+                            }
+                        },
+                        error: function (errorData) {
+
+                        }
+                    });
+                }
+                
+
+            });
+             
+            
+            $('#tblData').on('click', '.btn-danger', function () { // registering function for delete button  
+               
+                if(confirm('Silmek istediğine emin misin?'))
+                {
+                    $(this).parent().parent().remove();
+                    if ($("#tblData tbody").children().children().length == 0) {
+                        $("#tblData tbody").append(emptyRow);
+                    }
+                    const id = $(this).parent().parent().find(".tdId").html();
+
+                    $.ajax({
+                        type: "POST",
+                        cache: false,
+                        async: true,
+                        url: "/Customer/Delete/",
+                        data: { 
+                            Id: id.trim()
+                        },
+                        success: function (data) {
+                            if(data===true) {
+                                alert("Başarıyla silindi.");
+                                 window.location.reload(true);
+                            }
+                            else
+                            {
+                                 alert("Başarısız.");
+                            }
+                        },
+                        error: function (errorData) {
+
+                        }
+                    });
+                }
+            });
+            
+
+            $('#tblData').on('click', '.btn-cancel', function () { 
+                debugger;
+                $(this).parent().parent().remove();
+            });
+            $('#tblData').on('click', '.btn-edit', function () { 
+                const id =$(this).parent().parent().find(".tdId").html();
+
+                $(this).parent().parent().find(".tdId").html("<input type='text' value='"+id.trim()+"' class='form-control txtId' placeholder='Id Giriniz'/>"); 
+
+
+                const adi =$(this).parent().parent().find(".tdAdi").html();
+
+                $(this).parent().parent().find(".tdAdi").html("<input type='text' value='"+adi.trim()+"' class='form-control txtAdi' placeholder='Adı Giriniz'/>"); 
+
+
+                const soyadi =$(this).parent().parent().find(".tdSoyadi").html();
+
+                $(this).parent().parent().find(".tdSoyadi").html("<input type='text' value='"+soyadi.trim()+"' class='form-control txtSoyadi' placeholder='Soyadı Giriniz'/>"); 
+                
+                 const dogumTarihi =$(this).parent().parent().find(".tdDogumTarihi").html();
+
+                $(this).parent().parent().find(".tdDogumTarihi").html("<input type='text' value='"+dogumTarihi.trim()+"' class='form-control txtDogumTarihi datetimepicker' placeholder='Doğum Tarihi Giriniz'/>"); 
+                
+                 const telNo =$(this).parent().parent().find(".tdTelNo").html();
+
+                $(this).parent().parent().find(".tdTelNo").html("<input type='text' value='"+telNo.trim()+"' class='form-control txtTelNo' placeholder='05xxxxxxxxx'/>"); 
+                
+                 const email =$(this).parent().parent().find(".tdEmail").html();
+
+                $(this).parent().parent().find(".tdEmail").html("<input type='text' value='"+email.trim()+"' class='form-control txtEmail' placeholder='ornek@ornek.com'/>"); 
+                
+                debugger;
+                
+                const cinsiyet =$(this).parent().parent().find(".tdCinsiyet").html();
+
+                var selectCin = cinsiyetIslem(cinsiyet,id);
+
+                $(this).parent().parent().find(".tdCinsiyet").html(selectCin);
+               
+                const durum =$(this).parent().parent().find(".tdDurum").html();
+                 
+                if (durum.trim() === "Aktif")
+                {
+                     $(this).parent().parent().find(".tdDurum").html("<div class='form-check form-switch'> <input class='form-check-input ckboxDurum' type='checkbox' id='mySwitch_"+id.trim()+"' name='darkmode' value='yes' checked> </div>");
+                }
+                else
+                {
+                     $(this).parent().parent().find(".tdDurum").html("<div class='form-check form-switch'> <input class='form-check-input ckboxDurum' type='checkbox' id='mySwitch_"+id.trim()+"' name='darkmode' value='no'> </div>");
+                }
+
+
+                debugger;
+                $(this).parent().parent().find(".tdAction").html(rowUpdateButtons);
+
+               
+                $('.datetimepicker').datetimepicker({
+                    lang: 'tr',
+                    format: 'd.m.Y',
+                    onSelectDate: function (currentDate, $input) {
+                        $input.change();
+                    }
+                 });
+
+                
+            });
+       
+
+            $('#tblData').on('change', '.ckboxDurum', function () { 
+                
+               console.log(this.id);
+               const v =  $('#'+this.id).val();
+               if(v==="yes")
+               {
+                  $('#'+this.id).val('no');
+               }
+               else
+               {
+                  $('#'+this.id).val('yes');
+               }
+               console.log($('#'+this.id).val());
+            });
+
+           
+           $('#tblData').on('click', '.btn-cancel-process', function () {
+              window.location.reload(true);
+           });
+
+     });
+
+
+     function cinsiyetIslem(cinsiyet,id)
+     {
+         var cin= cinsiyet.trim();
+         var cinSelect="";
+         if (cin === "Erkek")
+         {
+             cinSelect = "<select class='form-select form-select-sm' id='mySelect_"+id.trim()+"' aria-label='.form-select-sm example'><option>Seçiniz</option><option value='1' selected>Erkek</option><option value='2'>Kadın</option><option value='3'>Belirtilmemiş</option></select>";
+         }
+         else if (cin === "Kadın")
+         {
+            cinSelect = "<select class='form-select form-select-sm' id='mySelect_"+id.trim()+"' aria-label='.form-select-sm example'><option>Seçiniz</option><option value='1'>Erkek</option><option value='2' selected>Kadın</option><option value='3'>Belirtilmemiş</option></select>";
+         }
+         else
+         {
+            cinSelect = "<select class='form-select form-select-sm' id='mySelect_"+id.trim()+"' aria-label='.form-select-sm example'><option>Seçiniz</option><option value='1'>Erkek</option><option value='2'>Kadın</option><option value='3' selected>Belirtilmemiş</option></select>";
+         }
+         return cinSelect;
+     }
+     function cinsiyetIslem2(cinsiyet)
+     {
+         if (cinsiyet === "1") 
+            return "Erkek";
+
+         if (cinsiyet === "2")
+            return "Kadın";
+         
+         return "Belirtilmemiş";
+     }
+     function CheckValue(columnName, columnValue)
+     {
+         if (columnName === "adi" && columnValue === '')
+         {  
+             return "Lütfen Müşteri Adı kontrol ediniz!";
+         }
+         if (columnName === "soyadi" && columnValue === '')
+         {  
+             return "Lütfen Müşteri Soyadı kontrol ediniz!";
+         }
+         if (columnName === "dogumTarihi" && columnValue === '')
+         {  
+             return "Lütfen Müşteri Doğum Tarihi kontrol ediniz!";
+         }
+         if (columnName === "telNo")
+         {  
+             if(columnValue === '')
+                return "Lütfen Müşteri Telefon giriniz!";
+           
+             var regNumbers = new RegExp('^([0][5][0-9]{9})$');
+             
+             if (!regNumbers.test(columnValue))
+             {
+                return "Lütfen Müşteri Telefon no kontrol ediniz! örnek: 05xxxxxxxxx";
+             }
+
+             if(columnValue.length!==11)
+                return "Lütfen Müşteri Telefon no kontrol ediniz! 11 basamaklı sayı olmalı!";
+
+               
+         }
+         if (columnName === "email")
+         {  
+             if(columnValue === '')
+                return "Lütfen Müşteri E-posta kontrol ediniz!";
+                
+             var regEmail = new RegExp('^[a-zA-Z0-9._%+-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$');
+             
+             if (!regEmail.test(columnValue))
+             {
+                return "Lütfen Müşteri Email kontrol ediniz! örnek: ornek@ornek.com";
+             }
+         }
+         if (columnName === "cinsiyet")
+         {
+             if (columnValue === 'Seçiniz')
+               return "Lütfen Müşteri Cinsiyet seçiniz!";
+
+         }
+
+         return '';
+     }
+    </script> 
+
+
+   
+
+
+
+<script>
+    
+    //$(document).ready(function () {
+    //    $('#customer-table').dataTable({
+    //        "searching": true,
+    //        "aaSorting": [],
+    //        "columnDefs": [{ orderable: true, targets: [0] }],
+    //        "bInfo": false,
+    //        "pageLength": 5,
+    //        "bLengthChange": true,
+    //        "language": {
+    //           "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Turkish.json"
+    //        }
+    //    });
+    //});
+
+</script>
+
+
