@@ -17,7 +17,7 @@
 
 ### Teknolojiler:
   - kullanıldığı Dil: C#
-  - Uygulama Framework :  Asp.NetCore MVC 
+  - Uygulama Framework :  Asp.NetCore MVC 6.0
   - UI  Framework : Html Bootstrap, JQUERY, Ajax 
   - ORM Tools: Dapper Framework
   - Database: T-SQL
